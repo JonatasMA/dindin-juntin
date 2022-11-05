@@ -1,115 +1,255 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'dart:ffi';
+import 'dart:math';
 
-void main() {
-  runApp(const MyApp());
+import 'package:dindin_juntin/models/bill.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:dindin_juntin/firebase_options.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'widgets/card_list.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // await Firebase.initializeApp(
+  //   options: DefaultFirebaseOptions.currentPlatform,
+  // );
+  runApp(Home());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class Home extends StatelessWidget {
+  final Future<FirebaseApp> _fbApp =
+      Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  Home({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
+        title: 'Dindin Juntin',
+        theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
+        home: FutureBuilder(
+          future: _fbApp,
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              print('You have an error! ${snapshot.error.toString()}');
+              return Text('Somenthing went wrong!');
+            } else if (snapshot.hasData) {
+              return const HomePage(title: 'Dindin Juntin');
+            } else {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+          },
+        )
+        // home: const MyHomePage(title: 'Dindin Juntin'),
+        );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
+class HomePage extends StatefulWidget {
+  const HomePage({super.key, required this.title});
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _HomePageState extends State<HomePage> {
+  dynamic _bills = [];
+  FloatingActionButtonLocation _fabLocation =
+      FloatingActionButtonLocation.endDocked;
 
-  void _incrementCounter() {
+  void _onButtomClick() {
+    print('index');
+  }
+
+  Widget place = const CircularProgressIndicator();
+
+  Future funcThatMakesAsyncCall() async {
+    DatabaseReference _fbd =
+        FirebaseDatabase.instance.ref('A1').child('jonatas').child('bills');
+    var result = await _fbd.get();
+    List bills = [];
+    for (var i = 0; i < result.children.length; i++) {
+      dynamic bill = result.child(i.toString());
+      bills.add(Bills.fromFirebase(bill));
+    }
+
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _bills = bills;
+      place = CardList(_bills);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    String saldo = '3,00';
+    final ButtonStyle style = TextButton.styleFrom(
+      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+    );
+    funcThatMakesAsyncCall();
+    // DatabaseReference _fbd = FirebaseDatabase.instance.ref('A1').child('jonatas').child('bills');
+    // _fbd.onValue.listen((DatabaseEvent event) {
+    //   data = event.snapshot.value.toString();
+    //   setState(() {
+    //     data = data;
+    //   });
+    // });
+
+    var _title = '';
+    var _value = '';
+
+    void _saveBill() {
+      DatabaseReference _testRef =
+          FirebaseDatabase.instance.ref('A1').child('jonatas');
+      Bills bill = Bills(_value, _title, 1);
+      _bills.add(bill);
+      List jsonBills = [];
+      _bills.forEach((value) => {
+        jsonBills.add(value.toJson())
+      });
+      _testRef.child('bills').set(jsonBills);
+    }
+
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
+        leading: IconButton(
+          tooltip: 'Menu',
+          icon: const Icon(Icons.menu),
+          onPressed: () {},
+        ),
+        actions: [
+          TextButton(
+            style: style,
+            onPressed: () {},
+            child: Text('Saldo: R\$ $saldo'),
+          ),
+          IconButton(
+            tooltip: 'Filtrar',
+            icon: const Icon(Icons.filter_alt),
+            onPressed: () {},
+          ),
+        ],
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+      body: Center(child: place),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => showDialog<String>(
+          context: context,
+          builder: (BuildContext context) => AlertDialog(
+            title: const Text('Cadastrar'),
+            content: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                  child: TextFormField(
+                    onChanged: (value) => {_title = value},
+                    decoration: const InputDecoration(
+                      border: UnderlineInputBorder(),
+                      labelText: 'Titulo',
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                  child: TextFormField(
+                    onChanged: (value) => {_value = value},
+                    decoration: const InputDecoration(
+                      border: UnderlineInputBorder(),
+                      labelText: 'Valor',
+                    ),
+                  ),
+                ),
+              ],
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.pop(context, 'Cancel'),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => {
+                  _saveBill(),
+                  Navigator.pop(context, 'OK')
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        ),
+        tooltip: 'Increment',
+        child: const Icon(Icons.add),
+      ),
+      floatingActionButtonLocation: _fabLocation,
+      bottomNavigationBar: _BottomAppBar(
+        fabLocation: _fabLocation,
+        shape: const AutomaticNotchedShape(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(0),
+            ),
+          ),
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(16)),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BottomAppBar extends StatelessWidget {
+  const _BottomAppBar({
+    this.fabLocation = FloatingActionButtonLocation.centerDocked,
+    this.shape = const AutomaticNotchedShape(
+      RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(15),
+        ),
+      ),
+      RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(10)),
+      ),
+    ),
+  });
+
+  final FloatingActionButtonLocation fabLocation;
+  final NotchedShape? shape;
+
+  static final List<FloatingActionButtonLocation> centerLocations =
+      <FloatingActionButtonLocation>[
+    FloatingActionButtonLocation.centerDocked,
+    FloatingActionButtonLocation.centerFloat,
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return BottomAppBar(
+      shape: shape,
+      color: Colors.blue,
+      child: IconTheme(
+        data: IconThemeData(color: Theme.of(context).colorScheme.onPrimary),
+        child: Row(
+          children: <Widget>[
+            IconButton(
+              tooltip: 'Search',
+              icon: const Icon(Icons.person, color: Colors.white),
+              onPressed: () {},
+            ),
+            IconButton(
+              tooltip: 'Favorite',
+              icon: const Icon(Icons.group, color: Colors.white),
+              onPressed: () {},
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
