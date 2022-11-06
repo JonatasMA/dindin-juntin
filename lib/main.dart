@@ -61,27 +61,7 @@ class _HomePageState extends State<HomePage> {
   FloatingActionButtonLocation _fabLocation =
       FloatingActionButtonLocation.endDocked;
 
-  void _onButtomClick() {
-    print('index');
-  }
-
   Widget place = const CircularProgressIndicator();
-
-  Future funcThatMakesAsyncCall() async {
-    DatabaseReference _fbd =
-        FirebaseDatabase.instance.ref('A1').child('jonatas').child('bills');
-    var result = await _fbd.get();
-    List bills = [];
-    for (var i = 0; i < result.children.length; i++) {
-      dynamic bill = result.child(i.toString());
-      bills.add(Bills.fromFirebase(bill));
-    }
-
-    setState(() {
-      _bills = bills;
-      place = CardList(_bills);
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,22 +69,31 @@ class _HomePageState extends State<HomePage> {
     final ButtonStyle style = TextButton.styleFrom(
       foregroundColor: Theme.of(context).colorScheme.onPrimary,
     );
-    funcThatMakesAsyncCall();
-    // DatabaseReference _fbd = FirebaseDatabase.instance.ref('A1').child('jonatas').child('bills');
-    // _fbd.onValue.listen((DatabaseEvent event) {
-    //   data = event.snapshot.value.toString();
-    //   setState(() {
-    //     data = data;
-    //   });
-    // });
+    DatabaseReference _fbd = FirebaseDatabase.instance.ref('A1').child('jonatas').child('bills');
+    _fbd.onValue.listen((DatabaseEvent event) {
+      var result = event.snapshot;
+      List bills = [];
+      for (var i = 0; i < result.children.length; i++) {
+        dynamic bill = result.child(i.toString());
+        bills.add(Bills.fromFirebase(bill));
+      }
+
+      setState(() {
+        _bills = bills;
+        place = CardList(_bills);
+      });
+    });
 
     var _title = '';
     var _value = '';
+    DateTime _date = DateTime.now();
+    TextEditingController txt = TextEditingController();
+    txt.text = '${_date.day}/${_date.month}/${_date.year}';
 
     void _saveBill() {
       DatabaseReference _testRef =
           FirebaseDatabase.instance.ref('A1').child('jonatas');
-      Bills bill = Bills(_value, _title, 1);
+      Bills bill = Bills(_value, _title, 1, _date);
       _bills.add(bill);
       List jsonBills = [];
       _bills.forEach((value) => {
@@ -125,7 +114,7 @@ class _HomePageState extends State<HomePage> {
           TextButton(
             style: style,
             onPressed: () {},
-            child: Text('Saldo: R\$ $saldo'),
+            child: Text('Saldo: R\$ $saldo', style: const TextStyle(color: Colors.black),),
           ),
           IconButton(
             tooltip: 'Filtrar',
@@ -163,6 +152,25 @@ class _HomePageState extends State<HomePage> {
                     decoration: const InputDecoration(
                       border: UnderlineInputBorder(),
                       labelText: 'Valor',
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                  child: TextFormField(
+                    controller: txt,
+                    onTap: () async {
+                      DateTime? newDate = await showDatePicker(context: context, initialDate: _date, firstDate: DateTime(1900), lastDate: DateTime(2100));
+                      if (newDate == null) return;
+                      setState(() {
+                        _date = newDate;
+                        txt.text = '${_date.day}/${_date.month}/${_date.year}';
+                      });
+                    },
+                    decoration: const InputDecoration(
+                      border: UnderlineInputBorder(),
+                      labelText: 'Data',
                     ),
                   ),
                 ),
@@ -221,12 +229,6 @@ class _BottomAppBar extends StatelessWidget {
 
   final FloatingActionButtonLocation fabLocation;
   final NotchedShape? shape;
-
-  static final List<FloatingActionButtonLocation> centerLocations =
-      <FloatingActionButtonLocation>[
-    FloatingActionButtonLocation.centerDocked,
-    FloatingActionButtonLocation.centerFloat,
-  ];
 
   @override
   Widget build(BuildContext context) {

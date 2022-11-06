@@ -7,12 +7,12 @@ class CardList extends StatelessWidget {
   CardList(this.list, {super.key});
   @override
   Widget build(BuildContext context) {
-    print(list);
     List<Widget> cards = [];
     
     for (var i = 0; i < list.length; i++) {
+      String date = '${list[i].date.day}/${list[i].date.month}/${list[i].date.year}';
       cards.add(
-        ItenCard(list[i].title, list[i].value, list[i].billType)
+        ItenCard(list[i].title, list[i].value, list[i].billType, date)
       );
     }
 

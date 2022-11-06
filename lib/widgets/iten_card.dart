@@ -5,9 +5,10 @@ import 'package:flutter/material.dart';
 class ItenCard extends StatelessWidget {
   String title = '';
   String value = '0,00';
+  String date = '10/11/2022';
   int billType = 1;
 
-  ItenCard(this.title, this.value, this.billType, {super.key});
+  ItenCard(this.title, this.value, this.billType, this.date, {super.key});
 
   setIcon() {
     switch (billType) {
@@ -39,7 +40,7 @@ class ItenCard extends StatelessWidget {
         },
         child: ListTile(
           title: Text(title),
-          subtitle: Text('R\$ $value'),
+          subtitle: Text('R\$ $value \n$date'),
           trailing: setIcon(),
         ),
       ),
