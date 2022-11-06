@@ -1,4 +1,3 @@
-import 'package:dindin_juntin/models/bill.dart';
 import 'package:flutter/material.dart';
 import 'iten_card.dart';
 
@@ -16,11 +15,9 @@ class CardList extends StatelessWidget {
       );
     }
 
-    return Container(
-      child: ListView(
-        padding: const EdgeInsets.all(8),
-        children: cards,
-      )
+    return ListView(
+      padding: const EdgeInsets.all(8),
+      children: cards,
     );
   }
 }

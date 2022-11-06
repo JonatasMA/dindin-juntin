@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'iten_card.dart';
 
 class AddBillAlert {
   
-  @override
   build(BuildContext context) {
     return () => showDialog<String>(
       context: context,

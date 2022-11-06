@@ -22,7 +22,7 @@ class Bills {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['value'] = value;
     data['title'] = title;
     data['billType'] = billType;

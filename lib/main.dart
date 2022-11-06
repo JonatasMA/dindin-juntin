@@ -1,18 +1,20 @@
-import 'package:dindin_juntin/views/homePage.dart';
+import 'package:dindin_juntin/views/home_page.dart';
 import 'package:dindin_juntin/views/login.dart';
+import 'package:dindin_juntin/views/sign_up.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:dindin_juntin/firebase_options.dart';
 import 'package:flutter/material.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(Main());
+  final FirebaseApp fbApp = await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  runApp(const Main());
 }
 
 class Main extends StatelessWidget {
-  final Future<FirebaseApp> _fbApp =
-      Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  Main({super.key});
+  
+  const Main({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,8 +23,9 @@ class Main extends StatelessWidget {
         theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
         initialRoute: '/login',
         routes: {
-          '/': (context) => HomePage(),
-          '/login': (context) => const Login()
+          '/': (context) => const HomePage(),
+          '/login': (context) => const Login(),
+          '/sign-up': (context) => const SignUp(),
         });
   }
 }
