@@ -71,11 +71,6 @@ class _HomePageState extends State<HomePage> {
               style: const TextStyle(color: Colors.black),
             ),
           ),
-          // IconButton(
-          //   tooltip: 'Filtrar',
-          //   icon: const Icon(Icons.filter_alt),
-          //   onPressed: () {},
-          // ),
         ],
       ),
       body: Center(child: futureWidget),

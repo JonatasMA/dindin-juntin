@@ -47,6 +47,7 @@ class _CustomAlertState extends State<CustomAlert> {
       title = bill.title;
       value = bill.value;
       txt.text = bill.getFormattedDate();
+      date = bill.date;
     }
     
     final CurrencyTextInputFormatter formatter = CurrencyTextInputFormatter(
@@ -58,7 +59,7 @@ class _CustomAlertState extends State<CustomAlert> {
 
     return AlertDialog(
       scrollable: true,
-      title: const Text('Cadastrar'),
+      title: Text(widget.index > -1 ? 'Editar' : 'Cadastrar'),
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -117,7 +118,7 @@ class _CustomAlertState extends State<CustomAlert> {
         ),
         TextButton(
           onPressed: () => {saveBill(), Navigator.pop(context, 'OK')},
-          child: const Text('Cadastrar'),
+          child: Text(widget.index > -1 ? 'Ok' : 'Cadastrar'),
         ),
       ],
     );
