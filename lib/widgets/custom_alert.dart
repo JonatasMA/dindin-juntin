@@ -1,10 +1,12 @@
 import 'package:dindin_juntin/models/bill.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
 
 class CustomAlert extends StatefulWidget {
   List<dynamic> bills;
-  CustomAlert({required this.bills, super.key});
+  int index = -1;
+  CustomAlert({required this.bills, this.index = -1, super.key});
 
   @override
   State<CustomAlert> createState() => _CustomAlertState();
@@ -12,7 +14,7 @@ class CustomAlert extends StatefulWidget {
 
 class _CustomAlertState extends State<CustomAlert> {
   var title = '';
-  var value = '';
+  num value = 0;
 
   DateTime date = DateTime.now();
   TextEditingController txt = TextEditingController();
@@ -21,7 +23,11 @@ class _CustomAlertState extends State<CustomAlert> {
     DatabaseReference testRef =
         FirebaseDatabase.instance.ref('A1').child('jonatas');
     Bills bill = Bills(value, title, 2, date);
-    widget.bills.add(bill);
+    if (widget.index > -1) {
+      widget.bills[widget.index] = bill;
+    } else {
+      widget.bills.add(bill);
+    }
     List jsonBills = [];
     widget.bills.forEach((value) => {jsonBills.add(value.toJson())});
     testRef.child('bills').set(jsonBills);
@@ -35,6 +41,20 @@ class _CustomAlertState extends State<CustomAlert> {
   @override
   Widget build(BuildContext context) {
     txt.text = '${date.day}/${date.month}/${date.year}';
+    
+    if (widget.index > -1) {
+      var bill = widget.bills[widget.index];
+      title = bill.title;
+      value = bill.value;
+      txt.text = bill.getFormattedDate();
+    }
+    
+    final CurrencyTextInputFormatter formatter = CurrencyTextInputFormatter(
+      locale: 'pt-br',
+      decimalDigits: 2,
+      symbol: 'R\$',
+      enableNegative: false
+    );
 
     return AlertDialog(
       scrollable: true,
@@ -46,6 +66,7 @@ class _CustomAlertState extends State<CustomAlert> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
             child: TextFormField(
+              initialValue: title,
               onChanged: (value) => {title = value},
               decoration: const InputDecoration(
                 border: UnderlineInputBorder(),
@@ -56,7 +77,9 @@ class _CustomAlertState extends State<CustomAlert> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             child: TextFormField(
-              onChanged: (newValue) => {value = newValue},
+              initialValue: formatter.format(value.toStringAsFixed(2)),
+              inputFormatters: [formatter],
+              onChanged: (newValue) => {value = formatter.getUnformattedValue()},
               decoration: const InputDecoration(
                 border: UnderlineInputBorder(),
                 labelText: 'Valor',
@@ -100,4 +123,3 @@ class _CustomAlertState extends State<CustomAlert> {
     );
   }
 }
-

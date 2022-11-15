@@ -1,3 +1,4 @@
+import 'package:dindin_juntin/models/bill.dart';
 import 'package:dindin_juntin/views/home_page.dart';
 import 'package:dindin_juntin/views/login.dart';
 import 'package:dindin_juntin/views/sign_up.dart';
@@ -20,7 +21,8 @@ class Main extends StatelessWidget {
     return MaterialApp(
         title: 'Dindin Juntin',
         theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
-        initialRoute: '/login',
+        initialRoute: '/',
+        // initialRoute: '/login',
         routes: {
           '/': (context) => const HomePage(),
           '/login': (context) => const Login(),

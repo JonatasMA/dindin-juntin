@@ -1,8 +1,9 @@
 class Bills {
-  String? value;
+  num? value;
   String? title;
   int? billType;
   DateTime? date;
+  bool? paid;
 
   Bills(this.value, this.title, this.billType, this.date);
 
@@ -10,7 +11,7 @@ class Bills {
     value = json['value'];
     title = json['title'];
     billType = json['billType'];
-    date = json['date'];
+    date = DateTime.tryParse(json['date']);
   }
 
   Bills.fromFirebase(bill) {
@@ -28,5 +29,9 @@ class Bills {
     data['billType'] = billType;
     data['date'] = date.toString();
     return data;
+  }
+
+  String getFormattedDate() {
+    return '${date?.day}/${date?.month}/${date?.year}';
   }
 }

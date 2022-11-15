@@ -6,6 +6,8 @@ import 'package:dindin_juntin/widgets/card_list.dart';
 
 import '../widgets/bottom_app_bar.dart';
 
+List<dynamic> billsList = [];
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -14,8 +16,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  dynamic _bills = [];
-
+  dynamic _filteredBills = [];
+  List<int> type = [0];
   final _fabLocation = FloatingActionButtonLocation.miniEndDocked;
 
   Widget futureWidget = const CircularProgressIndicator();
@@ -37,8 +39,18 @@ class _HomePageState extends State<HomePage> {
       }
 
       setState(() {
-        _bills = bills;
-        futureWidget = CardList(_bills);
+        billsList = bills;
+        if (type[0] == 0) {
+          _filteredBills = billsList;
+        } else {
+          _filteredBills = [];
+          for (var i = 0; i < bills.length; i++) {
+            if (bills[i].billType == type[0]) {
+              _filteredBills.add(bills[i]);
+            }
+          }
+        }
+        futureWidget = CardList(_filteredBills);
       });
     });
 
@@ -59,18 +71,18 @@ class _HomePageState extends State<HomePage> {
               style: const TextStyle(color: Colors.black),
             ),
           ),
-          IconButton(
-            tooltip: 'Filtrar',
-            icon: const Icon(Icons.filter_alt),
-            onPressed: () {},
-          ),
+          // IconButton(
+          //   tooltip: 'Filtrar',
+          //   icon: const Icon(Icons.filter_alt),
+          //   onPressed: () {},
+          // ),
         ],
       ),
       body: Center(child: futureWidget),
       floatingActionButton: FloatingActionButton(
         onPressed: () => showDialog<String>(
           context: context,
-          builder: (BuildContext context) => CustomAlert(bills: _bills),
+          builder: (BuildContext context) => CustomAlert(bills: billsList),
         ),
         tooltip: 'Increment',
         child: const Icon(Icons.add),
@@ -88,6 +100,7 @@ class _HomePageState extends State<HomePage> {
             borderRadius: BorderRadius.all(Radius.circular(16)),
           ),
         ),
+        type: type
       ),
     );
   }
