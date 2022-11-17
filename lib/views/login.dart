@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:dindin_juntin/main.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -9,7 +10,6 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-
   InputDecoration customInputDecoration(label) {
     return InputDecoration(
         border: const UnderlineInputBorder(),
@@ -27,8 +27,6 @@ class _LoginState extends State<Login> {
   Widget build(BuildContext context) {
     String email = '';
     String pass = '';
-
-    bool checking = false;
 
     return Scaffold(
       body: Center(
@@ -78,7 +76,7 @@ class _LoginState extends State<Login> {
                     ),
                     TextButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/sign-up');
+                        Navigator.pushReplacementNamed(context, '/sign-up');
                       },
                       child: const Text('Cadastrar',
                           style: TextStyle(color: Colors.white)),
@@ -87,40 +85,33 @@ class _LoginState extends State<Login> {
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-                  child: checking
-                      ? const CircularProgressIndicator()
-                      : TextButton(
-                          onPressed: () {
-                            setState(() {
-                              checking = true;
-                            });
-                            FirebaseAuth.instance
-                                .signInWithEmailAndPassword(
-                                    email: email, password: pass)
-                                .then((value) {
-                              final user = value.user;
-                              setState(() {
-                                checking = false;
-                              });
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text('Bem vindo!'),
-                                      backgroundColor: Colors.greenAccent));
-                              Navigator.pushNamed(context, '/');
-                            }).catchError((error) {
-                              setState(() {
-                                checking = false;
-                              });
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text('Falha no login!'),
-                                      backgroundColor: Colors.redAccent));
-                            });
-                          },
-                          style: ButtonStyle(
-                              backgroundColor:
-                                  MaterialStateProperty.all(Colors.white)),
-                          child: const Text('Login')),
+                  child: TextButton(
+                      onPressed: () {
+                        FirebaseAuth.instance
+                            .signInWithEmailAndPassword(
+                                email: email, password: pass)
+                            .then((value) {
+                          final user = value.user;
+                          if (user != null) {
+                            userLogged =
+                                FirebaseAuth.instance.authStateChanges();
+                          }
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Bem vindo!'),
+                                  backgroundColor: Colors.greenAccent));
+                          Navigator.pushReplacementNamed(context, '/');
+                        }).catchError((error) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text('Falha no login!'),
+                                  backgroundColor: Colors.redAccent));
+                        });
+                      },
+                      style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.all(Colors.white)),
+                      child: const Text('Login')),
                 ),
               ],
             ),

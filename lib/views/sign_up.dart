@@ -1,5 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
+
+import '../models/saved_user.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -29,17 +32,25 @@ class _SignUpState extends State<SignUp> {
     String email = '';
     String pass = '';
     bool guest;
-    String code;
+    String code = '';
+
+    void saveUserData() {
+      DatabaseReference users =
+          FirebaseDatabase.instance.ref('Users').child(email);
+      SavedUser savedUser = SavedUser(email: email, local: code);
+      users.set(savedUser.toJson());
+    }
 
     void signInUser() async {
       await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: pass);
+      saveUserData();
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: pass)
           .then((value) {
         final user = value.user;
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('Bem vindo!'), backgroundColor: Colors.greenAccent));
-        Navigator.pushNamed(context, '/');
+        Navigator.pushReplacementNamed(context, '/');
       }).catchError((error) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('Falha no login!'),
@@ -122,7 +133,7 @@ class _SignUpState extends State<SignUp> {
             child: TextFormField(
               enableSuggestions: false,
               autocorrect: false,
-              onChanged: (value) => {pass = value},
+              onChanged: (value) => {code = value},
               style: const TextStyle(color: Colors.white),
               decoration: customInputDecoration(
                   isChecked ? 'Código de convite' : 'Código de convidado'),

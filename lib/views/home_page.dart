@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:dindin_juntin/widgets/card_list.dart';
 
 import '../widgets/bottom_app_bar.dart';
+import '../widgets/custom_drawer.dart';
 
 List<dynamic> billsList = [];
 
@@ -57,11 +58,11 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dindin juntin'),
-        leading: IconButton(
-          tooltip: 'Menu',
-          icon: const Icon(Icons.menu),
-          onPressed: () {},
-        ),
+        // leading: IconButton(
+        //   tooltip: 'Menu',
+        //   icon: const Icon(Icons.menu),
+        //   onPressed: () {},
+        // ),
         actions: [
           TextButton(
             style: style,
@@ -73,6 +74,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+      drawer: const CustomDrawer(),
       body: Center(child: futureWidget),
       floatingActionButton: FloatingActionButton(
         onPressed: () => showDialog<String>(
