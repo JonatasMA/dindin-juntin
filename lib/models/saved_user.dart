@@ -3,7 +3,7 @@ class SavedUser {
   String? uid;
   String? local;
 
-  SavedUser({this.email, this.local});
+  SavedUser({this.email, this.uid, this.local});
 
   SavedUser.fromFirebase(user) {
     email = user.child('email').value;

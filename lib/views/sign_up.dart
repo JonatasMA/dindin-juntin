@@ -48,11 +48,10 @@ class _SignUpState extends State<SignUp> {
       code = generateRandomString(5);
     }
 
-    Future saveUserData(uuid) {
-      print(uuid);
+    Future saveUserData(uid) {
       DatabaseReference users =
-          FirebaseDatabase.instance.ref('Users').child(uuid);
-      SavedUser savedUser = SavedUser(email: email, local: code);
+          FirebaseDatabase.instance.ref('Users').child(uid);
+      SavedUser savedUser = SavedUser(email: email, uid: uid, local: code);
       return users.set(savedUser.toJson());
     }
 
