@@ -11,21 +11,25 @@ class ItenCard extends StatelessWidget {
   int billType = 1;
   int index;
 
-  ItenCard(this.title, this.value, this.billType, this.date, this.index, {super.key});
+  ItenCard(this.title, this.value, this.billType, this.date, this.index,
+      {super.key});
 
   setIcon() {
     switch (billType) {
-      case 1: {
-        return const Icon(Icons.arrow_downward, color: Colors.green);
-      }
+      case 1:
+        {
+          return const Icon(Icons.arrow_upward, color: Colors.green);
+        }
 
-      case 2: {
-        return const Icon(Icons.arrow_upward, color: Colors.red);
-      }
+      case 2:
+        {
+          return const Icon(Icons.arrow_downward, color: Colors.red);
+        }
 
-      case 3: {
-        return const Icon(Icons.group, color: Colors.amber);
-      }
+      case 3:
+        {
+          return const Icon(Icons.group, color: Colors.amber);
+        }
     }
   }
 
@@ -38,7 +42,10 @@ class ItenCard extends StatelessWidget {
         splashColor: Colors.green.withAlpha(30),
         onTap: () => showDialog<String>(
           context: context,
-          builder: (BuildContext context) => CustomAlert(bills: billsList, index: index,),
+          builder: (BuildContext context) => CustomAlert(
+            bills: billsList,
+            index: index,
+          ),
         ),
         child: ListTile(
           title: Text(title),

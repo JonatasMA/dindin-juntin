@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'dart:math';
 
 import '../models/saved_user.dart';
 
@@ -12,6 +13,20 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
+  String email = '';
+  String pass = '';
+  bool guest = false;
+
+  String generateRandomString(int len) {
+    var r = Random();
+    const _chars =
+        'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+    return List.generate(len, (index) => _chars[r.nextInt(_chars.length)])
+        .join();
+  }
+
+  String code = '';
+
   InputDecoration customInputDecoration(label) {
     return InputDecoration(
         border: const UnderlineInputBorder(),
@@ -29,21 +44,22 @@ class _SignUpState extends State<SignUp> {
 
   @override
   Widget build(BuildContext context) {
-    String email = '';
-    String pass = '';
-    bool guest;
-    String code = '';
+    if (!isChecked) {
+      code = generateRandomString(5);
+    }
 
-    void saveUserData() {
+    Future saveUserData(uuid) {
+      print(uuid);
       DatabaseReference users =
-          FirebaseDatabase.instance.ref('Users').child(email);
+          FirebaseDatabase.instance.ref('Users').child(uuid);
       SavedUser savedUser = SavedUser(email: email, local: code);
-      users.set(savedUser.toJson());
+      return users.set(savedUser.toJson());
     }
 
     void signInUser() async {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: pass);
-      saveUserData();
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: pass);
+      await saveUserData(userCredential.user?.uid);
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: pass)
           .then((value) {
@@ -117,22 +133,28 @@ class _SignUpState extends State<SignUp> {
                 onChanged: (bool? value) {
                   setState(() {
                     if (value != null) {
+                      if (value) {
+                        code = '';
+                      }
                       isChecked = value;
                     } else {
                       isChecked = false;
                     }
-                    isChecked = value!;
+                    // isChecked = value!;
                   });
                 },
               ),
-              const Text('Foi convidado?', style: TextStyle(color: Colors.white))
+              const Text('Foi convidado?',
+                  style: TextStyle(color: Colors.white))
             ],
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
             child: TextFormField(
+              controller: TextEditingController(text: code),
               enableSuggestions: false,
               autocorrect: false,
+              readOnly: !isChecked,
               onChanged: (value) => {code = value},
               style: const TextStyle(color: Colors.white),
               decoration: customInputDecoration(
