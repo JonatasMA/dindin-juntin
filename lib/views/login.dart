@@ -93,8 +93,13 @@ class _LoginState extends State<Login> {
                             .then((value) {
                           final user = value.user;
                           if (user != null) {
-                            userLogged =
-                                FirebaseAuth.instance.authStateChanges();
+                            FirebaseAuth.instance
+                                .authStateChanges()
+                                .listen((event) {
+                              if (event != null) {
+                                userLogged = event;
+                              }
+                            });
                           }
                           ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(

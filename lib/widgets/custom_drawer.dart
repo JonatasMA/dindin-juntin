@@ -1,6 +1,7 @@
 import 'package:dindin_juntin/main.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class CustomDrawer extends StatefulWidget {
   const CustomDrawer({super.key});
@@ -30,20 +31,20 @@ class _CustomDrawerState extends State<CustomDrawer> {
             padding: EdgeInsets.only(
                 top: MediaQuery.of(context).padding.top, bottom: 24),
             child: Column(
-              children: const [
+              children: [
                 CircleAvatar(
                   radius: 52,
-                  backgroundImage: NetworkImage(
+                  backgroundImage: CachedNetworkImageProvider(userLogged.photoURL ??
                       'https://i.natgeofe.com/k/63b1a8a7-0081-493e-8b53-81d01261ab5d/red-panda-full-body_16x9.jpg'),
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 Text(
-                  'Jonatas',
-                  style: TextStyle(fontSize: 28, color: Colors.white),
+                  userLogged.displayName,
+                  style: const TextStyle(fontSize: 28, color: Colors.white),
                 ),
                 Text(
-                  'jonatasmacedo70@hotmail.com',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
+                  userLogged.email ?? '',
+                  style: const TextStyle(fontSize: 16, color: Colors.white),
                 )
               ],
             ),
@@ -78,13 +79,4 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   }),
         ],
       );
-
-  String userPhoto() {
-    String photo =
-        'https://i.natgeofe.com/k/63b1a8a7-0081-493e-8b53-81d01261ab5d/red-panda-full-body_16x9.jpg';
-    // if (userLogged != null && userLogged.photoURL != null) {
-    //   photo = userLogged.photoURL;
-    // }
-    return photo;
-  }
 }

@@ -1,20 +1,40 @@
 import 'dart:ffi';
 
+import 'package:dindin_juntin/main.dart';
 import 'package:dindin_juntin/views/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:dindin_juntin/widgets/custom_alert.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ItenCard extends StatelessWidget {
   String title = '';
   num value = 0;
   String date = '10/11/2022';
   int billType = 1;
+  String biller = '';
+  String billerPhoto = '';
   int index;
 
-  ItenCard(this.title, this.value, this.billType, this.date, this.index,
+  ItenCard(this.title, this.value, this.billType, this.date, this.biller,
+      this.billerPhoto, this.index,
       {super.key});
 
   setIcon() {
+    if (biller != userLogged?.uid) {
+      switch (billType) {
+        case 1:
+          {
+            billType = 2;
+          }
+          break;
+
+        case 2:
+          {
+            billType = 1;
+          }
+          break;
+      }
+    }
     switch (billType) {
       case 1:
         {
@@ -48,6 +68,9 @@ class ItenCard extends StatelessWidget {
           ),
         ),
         child: ListTile(
+          leading: CircleAvatar(
+            backgroundImage: CachedNetworkImageProvider(billerPhoto),
+          ),
           title: Text(title),
           subtitle: Text('R\$ $formatedValue \n$date'),
           trailing: setIcon(),

@@ -11,7 +11,7 @@ class CardList extends StatelessWidget {
     for (var i = 0; i < list.length; i++) {
       String date = '${list[i].date.day}/${list[i].date.month}/${list[i].date.year}';
       cards.add(
-        ItenCard(list[i].title, list[i].value, list[i].billType, date, i)
+        ItenCard(list[i].title, list[i].value, list[i].billType, date, list[i].biller, list[i].billerPhoto, i)
       );
     }
 

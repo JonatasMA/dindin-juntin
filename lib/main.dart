@@ -6,13 +6,17 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:dindin_juntin/firebase_options.dart';
 import 'package:flutter/material.dart';
 
-var userLogged = FirebaseAuth.instance.authStateChanges();
+var userLogged;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final FirebaseApp fbApp = await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform);
-  
+  FirebaseAuth.instance.authStateChanges().listen((event) {
+    if (event != null) {
+      userLogged = event;
+    }
+  });
   runApp(const Main());
 }
 
@@ -24,7 +28,7 @@ class Main extends StatelessWidget {
     return MaterialApp(
         title: 'Dindin Juntin',
         theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
-        // initialRoute: '/',
+        // initialRoute: '/sign-up',
         initialRoute: userLogged is User ? '/' : '/login',
         routes: {
           '/': (context) => const HomePage(),

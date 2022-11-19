@@ -24,9 +24,8 @@ class _CustomAlertState extends State<CustomAlert> {
 
   void saveBill() {
     DatabaseReference testRef = FirebaseDatabase.instance
-        .ref(widget.user?.local)
-        .child(widget.user?.uid ?? '');
-    Bills bill = Bills(value, title, 2, date);
+        .ref(widget.user?.local);
+    Bills bill = Bills(value, title, 2, date, widget.user?.uid, widget.user?.photoURL);
     if (widget.index > -1) {
       widget.bills[widget.index] = bill;
     } else {

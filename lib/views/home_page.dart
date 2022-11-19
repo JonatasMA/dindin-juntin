@@ -29,6 +29,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // userLogged.updateDisplayName('Jonatas Macedo');
+    // userLogged.updatePhotoURL(
+    //     'https://www.infoescola.com/wp-content/uploads/2008/05/capivara-119654188.jpg');
     String saldo = '3,00';
     final ButtonStyle style = TextButton.styleFrom(
       foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -44,7 +47,6 @@ class _HomePageState extends State<HomePage> {
             _user = SavedUser.fromFirebase(teste.child(user.uid));
             fbd
                 .ref(_user?.local)
-                .child(_user?.uid ?? '')
                 .child('bills')
                 .onValue
                 .listen((DatabaseEvent event) {
