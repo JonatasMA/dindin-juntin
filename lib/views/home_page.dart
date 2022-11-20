@@ -29,14 +29,36 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // userLogged.updateDisplayName('Jonatas Macedo');
-    // userLogged.updatePhotoURL(
-    //     'https://www.infoescola.com/wp-content/uploads/2008/05/capivara-119654188.jpg');
     String saldo = '3,00';
     final ButtonStyle style = TextButton.styleFrom(
       foregroundColor: Theme.of(context).colorScheme.onPrimary,
     );
     final FirebaseDatabase fbd = FirebaseDatabase.instance;
+
+    
+    dynamic filterBill(bills) {
+      var filteredBills = [];
+
+      for (var i = 0; i < bills.length; i++) {
+        var bill = bills[i];
+        if (bills[i].biller != userLogged?.uid) {
+          switch (bill.billType) {
+            case 1:
+              bill.billType = 2;
+              break;
+
+            case 2:
+              bill.billType = 1;
+              break;
+          }
+        }
+        if (bill.billType == type[0] || type[0] == 0) {
+          filteredBills.add(bill);
+        }
+      }
+
+      return filteredBills;
+    }
 
     FirebaseAuth.instance.authStateChanges().listen((user) async {
       if (user != null) {
@@ -59,16 +81,7 @@ class _HomePageState extends State<HomePage> {
 
               setState(() {
                 billsList = bills;
-                if (type[0] == 0) {
-                  _filteredBills = billsList;
-                } else {
-                  _filteredBills = [];
-                  for (var i = 0; i < bills.length; i++) {
-                    if (bills[i].billType == type[0]) {
-                      _filteredBills.add(bills[i]);
-                    }
-                  }
-                }
+                _filteredBills = filterBill(billsList);
                 futureWidget = CardList(_filteredBills);
               });
             });
@@ -80,11 +93,6 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Dindin juntin'),
-        // leading: IconButton(
-        //   tooltip: 'Menu',
-        //   icon: const Icon(Icons.menu),
-        //   onPressed: () {},
-        // ),
         actions: [
           TextButton(
             style: style,

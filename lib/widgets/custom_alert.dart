@@ -23,9 +23,10 @@ class _CustomAlertState extends State<CustomAlert> {
   TextEditingController txt = TextEditingController();
 
   void saveBill() {
-    DatabaseReference testRef = FirebaseDatabase.instance
-        .ref(widget.user?.local);
-    Bills bill = Bills(value, title, 2, date, widget.user?.uid, widget.user?.photoURL);
+    DatabaseReference testRef =
+        FirebaseDatabase.instance.ref(widget.user?.local);
+    Bills bill =
+        Bills(value, title, 2, date, widget.user?.uid, widget.user?.photoURL);
     if (widget.index > -1) {
       widget.bills[widget.index] = bill;
     } else {
@@ -44,7 +45,7 @@ class _CustomAlertState extends State<CustomAlert> {
   @override
   Widget build(BuildContext context) {
     txt.text = '${date.day}/${date.month}/${date.year}';
-
+    var type;
     if (widget.index > -1) {
       var bill = widget.bills[widget.index];
       title = bill.title;
@@ -112,6 +113,30 @@ class _CustomAlertState extends State<CustomAlert> {
               ),
             ),
           ),
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          //   child: Row(
+          //     mainAxisAlignment: MainAxisAlignment.start,
+          //     children: [
+          //       // ListTile(
+          //       //   title: const Text('Individual'),
+          //       //   leading: Radio(
+          //       //     value: 1,
+          //       //     groupValue: type,
+          //       //     onChanged: (a) {},
+          //       //   ),
+          //       // ),
+          //       // ListTile(
+          //       //   title: const Text('Grupo'),
+          //       //   leading: Radio(
+          //       //     value: 2,
+          //       //     groupValue: type,
+          //       //     onChanged: (a) {},
+          //       //   ),
+          //       // )
+          //     ],
+          //   ),
+          // ),
         ],
       ),
       actions: <Widget>[

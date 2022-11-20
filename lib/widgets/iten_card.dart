@@ -20,21 +20,6 @@ class ItenCard extends StatelessWidget {
       {super.key});
 
   setIcon() {
-    if (biller != userLogged?.uid) {
-      switch (billType) {
-        case 1:
-          {
-            billType = 2;
-          }
-          break;
-
-        case 2:
-          {
-            billType = 1;
-          }
-          break;
-      }
-    }
     switch (billType) {
       case 1:
         {
