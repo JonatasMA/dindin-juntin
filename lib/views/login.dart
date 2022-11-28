@@ -1,6 +1,6 @@
+import 'package:dindin_juntin/variables.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:dindin_juntin/main.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -97,7 +97,7 @@ class _LoginState extends State<Login> {
                                 .authStateChanges()
                                 .listen((event) {
                               if (event != null) {
-                                userLogged = event;
+                                Variables.userLogged = event;
                               }
                             });
                           }

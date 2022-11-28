@@ -1,26 +1,17 @@
-import 'dart:ffi';
-
-import 'package:dindin_juntin/main.dart';
-import 'package:dindin_juntin/views/home_page.dart';
+import 'package:dindin_juntin/models/bill.dart';
+import 'package:dindin_juntin/variables.dart';
 import 'package:flutter/material.dart';
 import 'package:dindin_juntin/widgets/custom_alert.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class ItenCard extends StatelessWidget {
-  String title = '';
-  num value = 0;
-  String date = '10/11/2022';
-  int billType = 1;
-  String biller = '';
-  String billerPhoto = '';
+  Bills bill;
   int index;
 
-  ItenCard(this.title, this.value, this.billType, this.date, this.biller,
-      this.billerPhoto, this.index,
-      {super.key});
+  ItenCard(this.bill, this.index, {super.key});
 
   setIcon() {
-    switch (billType) {
+    switch (bill.billType) {
       case 1:
         {
           return const Icon(Icons.arrow_upward, color: Colors.green);
@@ -40,7 +31,7 @@ class ItenCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String formatedValue = value.toStringAsFixed(2).replaceAll('.', ',');
+    String formatedValue = bill.value?.toStringAsFixed(2).replaceAll('.', ',') ?? '0,00';
     return Card(
       clipBehavior: Clip.hardEdge,
       child: InkWell(
@@ -48,16 +39,16 @@ class ItenCard extends StatelessWidget {
         onTap: () => showDialog<String>(
           context: context,
           builder: (BuildContext context) => CustomAlert(
-            bills: billsList,
+            bills: Variables.bills,
             index: index,
           ),
         ),
         child: ListTile(
           leading: CircleAvatar(
-            backgroundImage: CachedNetworkImageProvider(billerPhoto),
+            backgroundImage: CachedNetworkImageProvider(bill.billerPhoto ?? ''),
           ),
-          title: Text(title),
-          subtitle: Text('R\$ $formatedValue \n$date'),
+          title: Text(bill.title ?? ''),
+          subtitle: Text('R\$ $formatedValue \n${bill.date}'),
           trailing: setIcon(),
         ),
       ),

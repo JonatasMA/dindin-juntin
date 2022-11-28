@@ -1,6 +1,4 @@
-import 'package:dindin_juntin/main.dart';
-import 'package:dindin_juntin/models/saved_user.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:dindin_juntin/variables.dart';
 import 'package:dindin_juntin/models/bill.dart';
 import 'package:dindin_juntin/widgets/custom_alert.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -9,9 +7,6 @@ import 'package:dindin_juntin/widgets/card_list.dart';
 
 import '../widgets/bottom_app_bar.dart';
 import '../widgets/custom_drawer.dart';
-
-List<dynamic> billsList = [];
-SavedUser? _user;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -34,14 +29,13 @@ class _HomePageState extends State<HomePage> {
       foregroundColor: Theme.of(context).colorScheme.onPrimary,
     );
     final FirebaseDatabase fbd = FirebaseDatabase.instance;
-
-    
+    bool billsLoading = false;
     dynamic filterBill(bills) {
       var filteredBills = [];
 
       for (var i = 0; i < bills.length; i++) {
         var bill = bills[i];
-        if (bills[i].biller != userLogged?.uid) {
+        if (bills[i].biller != Variables.userLogged.uid) {
           switch (bill.billType) {
             case 1:
               bill.billType = 2;
@@ -60,34 +54,26 @@ class _HomePageState extends State<HomePage> {
       return filteredBills;
     }
 
-    FirebaseAuth.instance.authStateChanges().listen((user) async {
-      if (user != null) {
-        fbd.ref('Users').onValue.listen((DatabaseEvent event) {
-          print(user.uid);
-          if (event != null) {
-            var teste = event.snapshot;
-            _user = SavedUser.fromFirebase(teste.child(user.uid));
-            fbd
-                .ref(_user?.local)
-                .child('bills')
-                .onValue
-                .listen((DatabaseEvent event) {
-              var result = event.snapshot;
-              List bills = [];
-              for (var i = 0; i < result.children.length; i++) {
-                dynamic bill = result.child(i.toString());
-                bills.add(Bills.fromFirebase(bill));
-              }
+    fbd.ref('Users').onValue.listen((DatabaseEvent event) {
+      var teste = event.snapshot;
+      fbd
+          .ref(Variables.savedUser.local)
+          .child('bills')
+          .onValue
+          .listen((DatabaseEvent event) {
+        var result = event.snapshot;
+        List bills = [];
+        for (var i = 0; i < result.children.length; i++) {
+          dynamic bill = result.child(i.toString());
+          bills.add(Bills.fromFirebase(bill));
+        }
 
-              setState(() {
-                billsList = bills;
-                _filteredBills = filterBill(billsList);
-                futureWidget = CardList(_filteredBills);
-              });
-            });
-          }
+        setState(() {
+          Variables.bills = bills;
+          _filteredBills = filterBill(Variables.bills);
+          billsLoading = true;
         });
-      }
+      });
     });
 
     return Scaffold(
@@ -105,13 +91,17 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       drawer: const CustomDrawer(),
-      body: Center(child: futureWidget),
+      body: Center(
+        child: billsLoading
+            ? const CircularProgressIndicator()
+            : CardList(_filteredBills),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => showDialog<String>(
           context: context,
           builder: (BuildContext context) => CustomAlert(
-            bills: billsList,
-            user: _user,
+            bills: Variables.bills,
+            user: Variables.savedUser,
           ),
         ),
         tooltip: 'Increment',

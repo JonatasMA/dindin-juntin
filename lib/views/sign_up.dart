@@ -6,9 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:math';
-
-import '../models/saved_user.dart';
-import '../main.dart';
+import '../variables.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -18,9 +16,9 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
-  SavedUser savedUser = SavedUser();
   String pass = '';
   bool guest = false;
+  bool loading = false;
   File? photo;
   String? photoName;
 
@@ -52,48 +50,58 @@ class _SignUpState extends State<SignUp> {
   @override
   Widget build(BuildContext context) {
     if (!isChecked) {
-      savedUser.local = generateRandomString(5);
+      Variables.savedUser.local = generateRandomString(5);
     }
 
     Future saveUserData(uid) async {
       DatabaseReference users =
           FirebaseDatabase.instance.ref('Users').child(uid);
-      savedUser.uid = uid;
-      
-      final storageRef = FirebaseStorage.instance.ref();
-      final imagesRef = storageRef.child("files/$photoName");
-      await imagesRef.putFile(photo!);
+      Variables.savedUser.uid = uid;
+      var photoURL = '';
+      if (photo != null) {
+        final storageRef = FirebaseStorage.instance.ref();
+        final imagesRef = storageRef.child("files/$uid/$photoName");
+        await imagesRef.putFile(photo!);
+        photoURL = await imagesRef.getDownloadURL();
+        Variables.savedUser.photoURL = photoURL;
+      }
 
       FirebaseAuth.instance.authStateChanges().listen((event) async {
         if (event != null) {
-          userLogged = event;
-          var photoURL = await imagesRef.getDownloadURL();
-          setState(() {
-            savedUser.photoURL = photoURL;
-          });
-          userLogged.updatePhotoURL(photoURL);
-          userLogged.updateDisplayName(savedUser.name);
+          Variables.userLogged = event;
+          if (photoURL != '') {
+            Variables.userLogged.updatePhotoURL(photoURL);
+          }
+          Variables.userLogged.updateDisplayName(Variables.savedUser.name);
         }
       });
-      print(savedUser.toJson());
-      return users.set(savedUser.toJson());
+      return users.set(Variables.savedUser.toJson());
     }
 
     void signInUser() async {
       UserCredential userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: savedUser.email!, password: pass);
+          .createUserWithEmailAndPassword(
+              email: Variables.savedUser.email!, password: pass);
       await saveUserData(userCredential.user?.uid);
       await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: savedUser.email!, password: pass)
+          .signInWithEmailAndPassword(email: Variables.savedUser.email!, password: pass)
           .then((value) {
         final user = value.user;
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('Bem vindo!'), backgroundColor: Colors.greenAccent));
         Navigator.pushReplacementNamed(context, '/');
       }).catchError((error) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Falha no login!'),
-            backgroundColor: Colors.redAccent));
+        if (error != null) {
+          setState(() {
+            loading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Falha no login!'),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+        }
       });
     }
 
@@ -132,7 +140,8 @@ class _SignUpState extends State<SignUp> {
         return FileImage(photo!);
       }
 
-      return NetworkImage('https://i.natgeofe.com/k/63b1a8a7-0081-493e-8b53-81d01261ab5d/red-panda-full-body_16x9.jpg');
+      return NetworkImage(
+          'https://i.natgeofe.com/k/63b1a8a7-0081-493e-8b53-81d01261ab5d/red-panda-full-body_16x9.jpg');
     }
 
     return Scaffold(
@@ -165,7 +174,7 @@ class _SignUpState extends State<SignUp> {
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 child: TextFormField(
                   style: const TextStyle(color: Colors.blue),
-                  onChanged: (value) => {savedUser.name = value},
+                  onChanged: (value) => {Variables.savedUser.name = value},
                   cursorColor: Colors.blue,
                   decoration: customInputDecoration('Nome'),
                 ),
@@ -176,7 +185,7 @@ class _SignUpState extends State<SignUp> {
                 child: TextFormField(
                   keyboardType: TextInputType.emailAddress,
                   style: const TextStyle(color: Colors.blue),
-                  onChanged: (value) => {savedUser.email = value},
+                  onChanged: (value) => {Variables.savedUser.email = value},
                   cursorColor: Colors.blue,
                   decoration: customInputDecoration('E-mail'),
                 ),
@@ -205,7 +214,7 @@ class _SignUpState extends State<SignUp> {
                       setState(() {
                         if (value != null) {
                           if (value) {
-                            savedUser.local = '';
+                            Variables.savedUser.local = '';
                           }
                           isChecked = value;
                         } else {
@@ -223,11 +232,11 @@ class _SignUpState extends State<SignUp> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
                 child: TextFormField(
-                  controller: TextEditingController(text: savedUser.local),
+                  controller: TextEditingController(text: Variables.savedUser.local),
                   enableSuggestions: false,
                   autocorrect: false,
                   readOnly: !isChecked,
-                  onChanged: (value) => {savedUser.local = value},
+                  onChanged: (value) => {Variables.savedUser.local = value},
                   style: const TextStyle(color: Colors.blue),
                   decoration: customInputDecoration(
                       isChecked ? 'Código de convite' : 'Código de convidado'),
@@ -237,18 +246,23 @@ class _SignUpState extends State<SignUp> {
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                child: TextButton(
-                    onPressed: () {
-                      signInUser();
-                      appendNewUser();
-                    },
-                    style: ButtonStyle(
-                        backgroundColor:
-                            MaterialStateProperty.all(Colors.blue)),
-                    child: const Text(
-                      'Cadastrar',
-                      style: TextStyle(color: Colors.white),
-                    )),
+                child: loading
+                    ? const CircularProgressIndicator()
+                    : TextButton(
+                        onPressed: () {
+                          setState(() {
+                            loading = true;
+                          });
+                          signInUser();
+                          appendNewUser();
+                        },
+                        style: ButtonStyle(
+                            backgroundColor:
+                                MaterialStateProperty.all(Colors.blue)),
+                        child: const Text(
+                          'Cadastrar',
+                          style: TextStyle(color: Colors.white),
+                        )),
               ),
             ],
           ),

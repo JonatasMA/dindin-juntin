@@ -1,7 +1,8 @@
-import 'package:dindin_juntin/main.dart';
+import 'package:dindin_juntin/variables.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/services.dart';
 
 class CustomDrawer extends StatefulWidget {
   const CustomDrawer({super.key});
@@ -34,18 +35,37 @@ class _CustomDrawerState extends State<CustomDrawer> {
               children: [
                 CircleAvatar(
                   radius: 52,
-                  backgroundImage: CachedNetworkImageProvider(userLogged.photoURL ??
+                  backgroundImage: CachedNetworkImageProvider(Variables
+                          .userLogged.photoURL ??
                       'https://i.natgeofe.com/k/63b1a8a7-0081-493e-8b53-81d01261ab5d/red-panda-full-body_16x9.jpg'),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  userLogged.displayName,
+                  Variables.userLogged.displayName ?? 'Sem nome',
                   style: const TextStyle(fontSize: 28, color: Colors.white),
                 ),
                 Text(
-                  userLogged.email ?? '',
+                  Variables.userLogged.email ?? '',
                   style: const TextStyle(fontSize: 16, color: Colors.white),
-                )
+                ),
+                ActionChip(
+                  avatar: const Icon(Icons.copy, color: Colors.white),
+                  backgroundColor: Colors.blue[900],
+                  label: Text(
+                    Variables.savedUser.local ?? '',
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Clipboard.setData(
+                        ClipboardData(text: Variables.savedUser.local));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Copiado!'),
+                          backgroundColor: Colors.blueAccent),
+                    );
+                  },
+                ),
               ],
             ),
           ),

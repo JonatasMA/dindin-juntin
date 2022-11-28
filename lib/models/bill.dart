@@ -7,7 +7,15 @@ class Bills {
   DateTime? date;
   bool? paid;
 
-  Bills(this.value, this.title, this.billType, this.date, this.biller, this.billerPhoto);
+  Bills({
+    this.value,
+    this.title,
+    this.billType,
+    this.date,
+    this.biller,
+    this.billerPhoto,
+    this.paid = false,
+  });
 
   Bills.fromJson(Map<String, dynamic> json) {
     value = json['value'];
@@ -15,6 +23,7 @@ class Bills {
     billType = json['billType'];
     biller = json['biller'];
     billerPhoto = json['billerPhoto'];
+    paid = json['paid'];
     date = DateTime.tryParse(json['date']);
   }
 
@@ -23,6 +32,7 @@ class Bills {
     title = bill.child('title').value;
     billType = bill.child('billType').value;
     biller = bill.child('biller').value;
+    paid = bill.child('paid').value;
     billerPhoto = bill.child('billerPhoto').value;
     String dateAux = bill.child('date').value;
     date = DateTime.tryParse(dateAux);
@@ -34,6 +44,7 @@ class Bills {
     data['title'] = title;
     data['billType'] = billType;
     data['biller'] = biller;
+    data['paid'] = paid;
     data['billerPhoto'] = billerPhoto;
     data['date'] = date.toString();
     return data;
